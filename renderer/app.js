@@ -50,13 +50,14 @@ function Home({ tasks, onAddClick, onTaskClick, constructors }) {
               progress = comp / task.subtasks.length;
             }
 
-            // Car starts exactly at bottom: 24px (same baseline as the + icon)
-            // Available track height = 460px. Car height = 26px. 
-            // End target for 100% progress = 424px (leaves 10px buffer at the top)
-            // Distance of travel = 424 - 24 = 400px.
-            const bottomPx = task ? Math.round(24 + (progress * 400)) : 24;
+            // Car starts exactly at bottom: 24px (+ icon baseline)
+            // Available track height = 460px. Finish line is 65px from top boundary.
+            // Finish line intersection = 460 - 65 = 395px.
+            // Target car top nose = 395px. Car height = 48px. Target bottom = 395 - 48 = 347px.
+            // Travel distance = 347 - 24 = 323px.
+            const bottomPx = task ? Math.round(24 + (progress * 323)) : 24;
             const primaryColor = laneConstr ? laneConstr.primary_color : '#333';
-            const carImgSrc = laneConstr ? ('../assets/cars/' + laneConstr.car_file) : '';
+            const carImgSrc = laneConstr ? '../assets/cars/car.png' : '';
 
             return html`
               <div 
@@ -69,8 +70,7 @@ function Home({ tasks, onAddClick, onTaskClick, constructors }) {
                   <div 
                     class="car-img" 
                     style=${{ 
-                      bottom: bottomPx + 'px',
-                      backgroundColor: primaryColor,
+                      bottom: bottomPx + 'px'
                     }}
                   >
                     <img 
@@ -263,8 +263,22 @@ function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }
   }
 
   const handleToggle = async (subtaskId) => {
+    const currentSubtask = task.subtasks.find(s => s.id === subtaskId);
+    const newCompletedState = currentSubtask ? !currentSubtask.completed : true;
+    
     await window.pond.toggleSubtask(subtaskId);
-    await refreshTasks();
+    
+    const evaluatedSubtasks = task.subtasks.map(ch => 
+      ch.id === subtaskId ? { ...ch, completed: newCompletedState } : ch
+    );
+    
+    const fullyCompleted = evaluatedSubtasks.length > 0 && evaluatedSubtasks.every(st => st.completed);
+    
+    if (fullyCompleted) {
+      onCompleteTask(task);
+    } else {
+      await refreshTasks();
+    }
   };
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
@@ -343,11 +357,16 @@ function App() {
 
   const refreshData = useCallback(async () => {
     try {
-      const data = await window.pond.getTasks();
-      setTasks(data);
       if (window.pond.getConstructors) {
-        const cData = await window.pond.getConstructors();
+        const [tData, cData] = await Promise.all([
+          window.pond.getTasks(),
+          window.pond.getConstructors()
+        ]);
         setConstructors(cData);
+        setTasks(tData);
+      } else {
+        const data = await window.pond.getTasks();
+        setTasks(data);
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);

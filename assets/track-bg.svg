@@ -1,0 +1,92 @@
+<svg width="690" height="460" viewBox="0 0 690 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_n_12_5)">
+<g clip-path="url(#clip0_12_5)">
+<rect width="690" height="460" fill="#2D3132"/>
+<rect width="690" height="8" fill="#E3BD35"/>
+<rect y="60" width="690" height="8" fill="#E3BD35"/>
+<rect y="422" width="690" height="8" fill="#E3BD35"/>
+<rect y="8" width="26" height="26" fill="white"/>
+<rect x="52" y="8" width="26" height="26" fill="white"/>
+<rect x="104" y="8" width="26" height="26" fill="white"/>
+<rect x="156" y="8" width="26" height="26" fill="white"/>
+<rect x="208" y="8" width="26" height="26" fill="white"/>
+<rect x="260" y="8" width="26" height="26" fill="white"/>
+<rect x="312" y="8" width="26" height="26" fill="white"/>
+<rect x="364" y="8" width="26" height="26" fill="white"/>
+<rect x="416" y="8" width="26" height="26" fill="white"/>
+<rect x="468" y="8" width="26" height="26" fill="white"/>
+<rect x="520" y="8" width="26" height="26" fill="white"/>
+<rect x="572" y="8" width="26" height="26" fill="white"/>
+<rect x="624" y="8" width="26" height="26" fill="white"/>
+<rect x="676" y="8" width="26" height="26" fill="white"/>
+<rect x="26" y="34" width="26" height="26" fill="white"/>
+<rect x="78" y="34" width="26" height="26" fill="white"/>
+<rect x="130" y="34" width="26" height="26" fill="white"/>
+<rect x="182" y="34" width="26" height="26" fill="white"/>
+<rect x="234" y="34" width="26" height="26" fill="white"/>
+<rect x="286" y="34" width="26" height="26" fill="white"/>
+<rect x="338" y="34" width="26" height="26" fill="white"/>
+<rect x="390" y="34" width="26" height="26" fill="white"/>
+<rect x="442" y="34" width="26" height="26" fill="white"/>
+<rect x="494" y="34" width="26" height="26" fill="white"/>
+<rect x="546" y="34" width="26" height="26" fill="white"/>
+<rect x="598" y="34" width="26" height="26" fill="white"/>
+<rect x="650" y="34" width="26" height="26" fill="white"/>
+<rect y="34" width="26" height="26" fill="black"/>
+<rect x="52" y="34" width="26" height="26" fill="black"/>
+<rect x="104" y="34" width="26" height="26" fill="black"/>
+<rect x="156" y="34" width="26" height="26" fill="black"/>
+<rect x="208" y="34" width="26" height="26" fill="black"/>
+<rect x="260" y="34" width="26" height="26" fill="black"/>
+<rect x="312" y="34" width="26" height="26" fill="black"/>
+<rect x="364" y="34" width="26" height="26" fill="black"/>
+<rect x="416" y="34" width="26" height="26" fill="black"/>
+<rect x="468" y="34" width="26" height="26" fill="black"/>
+<rect x="520" y="34" width="26" height="26" fill="black"/>
+<rect x="572" y="34" width="26" height="26" fill="black"/>
+<rect x="624" y="34" width="26" height="26" fill="black"/>
+<rect x="676" y="34" width="26" height="26" fill="black"/>
+<rect x="26" y="8" width="26" height="26" fill="black"/>
+<rect x="78" y="8" width="26" height="26" fill="black"/>
+<rect x="130" y="8" width="26" height="26" fill="black"/>
+<rect x="182" y="8" width="26" height="26" fill="black"/>
+<rect x="234" y="8" width="26" height="26" fill="black"/>
+<rect x="286" y="8" width="26" height="26" fill="black"/>
+<rect x="338" y="8" width="26" height="26" fill="black"/>
+<rect x="390" y="8" width="26" height="26" fill="black"/>
+<rect x="442" y="8" width="26" height="26" fill="black"/>
+<rect x="494" y="8" width="26" height="26" fill="black"/>
+<rect x="546" y="8" width="26" height="26" fill="black"/>
+<rect x="598" y="8" width="26" height="26" fill="black"/>
+<rect x="650" y="8" width="26" height="26" fill="black"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_n_12_5" x="0" y="0" width="690" height="460" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.90909087657928467 0.90909087657928467" stitchTiles="stitch" numOctaves="3" result="noise" seed="9089" />
+<feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise" />
+<feComponentTransfer in="alphaNoise" result="coloredNoise1">
+<feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
+</feComponentTransfer>
+<feComposite operator="in" in2="shape" in="coloredNoise1" result="noise1Clipped" />
+<feComponentTransfer in="alphaNoise" result="coloredNoise2">
+<feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 "/>
+</feComponentTransfer>
+<feComposite operator="in" in2="shape" in="coloredNoise2" result="noise2Clipped" />
+<feFlood flood-color="rgba(0, 0, 0, 0.25)" result="color1Flood" />
+<feComposite operator="in" in2="noise1Clipped" in="color1Flood" result="color1" />
+<feFlood flood-color="rgba(57, 57, 57, 0.25)" result="color2Flood" />
+<feComposite operator="in" in2="noise2Clipped" in="color2Flood" result="color2" />
+<feMerge result="effect1_noise_12_5">
+<feMergeNode in="shape" />
+<feMergeNode in="color1" />
+<feMergeNode in="color2" />
+</feMerge>
+</filter>
+<clipPath id="clip0_12_5">
+<rect width="690" height="460" fill="white"/>
+</clipPath>
+</defs>
+</svg>

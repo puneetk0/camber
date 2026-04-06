@@ -14,13 +14,13 @@ function startNotchWatcher(win, showFn, hideFn, getVisibleFn) {
   const popoverX = Math.round(screenWidth / 2 - POPOVER_X_OFFSET);
 
 const NOTCH_ZONE = {
-  x: Math.round(screenWidth / 2 - 150),
+  x: Math.round(screenWidth / 2 - 100), // reduced width to 200
   y: 0,
-  width: 300,
-  height: 60,  // was 40 — covers the gap between notch and popover top
+  width: 200,
+  height: 25,  // greatly reduced from 60 to 25 so you have to actually hit the black notch
 };
 
-const GRACE_MS = 600;  // was 300
+const GRACE_MS = 300;  // was 300
 
   function isCursorSafe(cx, cy) {
     const inNotch =
