@@ -68,11 +68,16 @@ function Home({ tasks, constructors, onAddClick, onTaskClick }) {
 // ==========================================
 // Add Task Screen
 // ==========================================
-function AddTask({ goHome, constructors, preSelectedConstructorId }) {
-  const [title, setTitle] = useState('');
-  const [note, setNote] = useState('');
-  const [subtasks, setSubtasks] = useState([]);
-  const [constructorId, setConstructorId] = useState(preSelectedConstructorId || null);
+function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
+  const [title, setTitle] = useState(editTask ? editTask.title : '');
+  const [note, setNote] = useState(editTask ? (editTask.note || '') : '');
+  const [subtasks, setSubtasks] = useState(() => {
+    if (editTask && editTask.subtasks) {
+      return [...editTask.subtasks];
+    }
+    return [];
+  });
+  const [constructorId, setConstructorId] = useState(editTask ? editTask.constructor_id : (preSelectedConstructorId || null));
   const [error, setError] = useState('');
   const titleRef = useRef(null);
   const noteRef = useRef(null);
@@ -81,7 +86,7 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
   useEffect(() => { titleRef.current && titleRef.current.focus(); }, []);
 
   const addSubtask = () => {
-    setSubtasks(prev => [...prev, '']);
+    setSubtasks(prev => [...prev, { title: '', completed: false }]);
     setTimeout(() => {
       const refs = subtaskRefs.current;
       if (refs[refs.length - 1]) refs[refs.length - 1].focus();
@@ -89,7 +94,11 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
   };
 
   const updateSubtask = (i, val) => {
-    setSubtasks(prev => { const n = [...prev]; n[i] = val; return n; });
+    setSubtasks(prev => { 
+      const n = [...prev]; 
+      n[i] = typeof n[i] === 'string' ? { title: val, completed: false } : { ...n[i], title: val }; 
+      return n; 
+    });
   };
 
   const removeSubtask = (i) => {
@@ -104,11 +113,14 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (e.shiftKey) { addSubtask(); } else { handleSubmit(); }
-    } else if (e.key === 'Backspace' && subtasks[i] === '') {
-      e.preventDefault();
-      removeSubtask(i);
-      if (i > 0) setTimeout(() => subtaskRefs.current[i - 1] && subtaskRefs.current[i - 1].focus(), 50);
-      else noteRef.current && noteRef.current.focus();
+    } else if (e.key === 'Backspace') {
+      const titleStr = typeof subtasks[i] === 'string' ? subtasks[i] : subtasks[i].title;
+      if (titleStr === '') {
+        e.preventDefault();
+        removeSubtask(i);
+        if (i > 0) setTimeout(() => subtaskRefs.current[i - 1] && subtaskRefs.current[i - 1].focus(), 50);
+        else noteRef.current && noteRef.current.focus();
+      }
     }
   };
 
@@ -116,31 +128,81 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
     if (!title.trim()) { setError('Title required'); return; }
     if (!constructorId) { setError('Choose a constructor'); return; }
     setError('');
-    await window.pond.addTask({
-      title: title.trim(),
-      note: note.trim() || null,
-      subtasks: subtasks.filter(s => s.trim()),
-      constructor_id: constructorId
-    });
+    
+    if (editTask) {
+      await window.pond.updateTask({
+        id: editTask.id,
+        title: title.trim(),
+        note: note.trim() || null,
+        subtasks: subtasks.filter(s => {
+          const t = typeof s === 'string' ? s : s.title;
+          return t && t.trim();
+        }),
+        constructor_id: constructorId
+      });
+    } else {
+      await window.pond.addTask({
+        title: title.trim(),
+        note: note.trim() || null,
+        subtasks: subtasks.map(s => typeof s === 'string' ? s : s.title).filter(t => t && t.trim()),
+        constructor_id: constructorId
+      });
+    }
     goHome();
   };
 
   const selectedConstr = (constructors || []).find(c => c.id === constructorId);
 
+  const objectivesContent = html`
+    <div class="objectives-section">
+      <div class="section-eyebrow">Objectives</div>
+      <div class="subtask-scroll">
+        ${subtasks.map((st, i) => html`
+          <div class="objective-row" key=${st.id || i}>
+            <span class="obj-bullet">○</span>
+            <input
+              ref=${(el) => { subtaskRefs.current[i] = el; }}
+              class="objective-input"
+              type="text"
+              placeholder="Objective ${i + 1}"
+              value=${typeof st === 'string' ? st : st.title}
+              onInput=${(e) => updateSubtask(i, e.target.value)}
+              onKeyDown=${(e) => handleSubtaskKey(e, i)}
+            />
+            <button class="obj-remove" onClick=${() => removeSubtask(i)}>×</button>
+          </div>
+        `)}
+        <button class="add-objective-btn" onClick=${addSubtask}>+ Add Objective</button>
+      </div>
+    </div>
+  `;
+
   return html`
-    <div class="overlay-modal">
-      <div class="add-task-garage">
+    <div class=${'overlay-modal' + (editTask ? ' no-anim' : '')}>
+      <div class="detail-shell">
+        <div class="detail-header">
+          <div style=${{ justifySelf: 'start', display: 'flex' }}>
+            <button class="back-btn" onClick=${goHome}>
+              <span class="back-arrow-box">←</span>
+              Pit Lane
+            </button>
+          </div>
+          <div style=${{ justifySelf: 'center', display: 'flex' }}>
+            ${selectedConstr ? html`
+              <div class="team-badge" style=${{ borderColor: selectedConstr.primary_color + '88', background: selectedConstr.primary_color + '33' }}>
+                <div class="badge-pip" style=${{ background: selectedConstr.primary_color }}></div>
+                <span class="badge-team" style=${{ color: selectedConstr.primary_color }}>${selectedConstr.name.toUpperCase()}</span>
+              </div>
+            ` : null}
+          </div>
+          <div style=${{ justifySelf: 'end', display: 'flex' }}></div>
+        </div>
+
+        <div class="add-task-garage">
 
         <!-- Left: Telemetry panel -->
         <div class="garage-left-panel">
-          <div class="panel-top-bar" style=${{ background: selectedConstr ? selectedConstr.primary_color : 'rgba(255,255,255,0.15)' }}></div>
           <div class="panel-eyebrow">Race Engineer — Task Brief</div>
-
-          <div class="rpm-bar">
-            ${[...Array(12)].map((_, i) => html`
-              <div key=${i} class=${'rpm-seg' + (i < 3 ? ' green' : i < 5 ? ' yellow' : i < 7 ? ' red' : '')}></div>
-            `)}
-          </div>
 
           <div class="title-section">
             <input
@@ -154,50 +216,47 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
             />
           </div>
 
-          <textarea
-            ref=${noteRef}
-            class="task-note-input"
-            placeholder="Telemetry notes (optional)"
-            value=${note}
-            onInput=${(e) => setNote(e.target.value)}
-          />
-
-          <div class="objectives-section">
-            <div class="section-eyebrow">Objectives</div>
-            <div class="subtask-scroll">
-              ${subtasks.map((st, i) => html`
-                <div class="objective-row" key=${i}>
-                  <span class="obj-bullet">○</span>
-                  <input
-                    ref=${(el) => { subtaskRefs.current[i] = el; }}
-                    class="objective-input"
-                    type="text"
-                    placeholder="Objective ${i + 1}"
-                    value=${st}
-                    onInput=${(e) => updateSubtask(i, e.target.value)}
-                    onKeyDown=${(e) => handleSubtaskKey(e, i)}
-                  />
-                  <button class="obj-remove" onClick=${() => removeSubtask(i)}>×</button>
-                </div>
-              `)}
-            </div>
-            <button class="add-objective-btn" onClick=${addSubtask}>+ Add Objective</button>
+          <div class="note-wrapper" style=${editTask ? { flex: 1, minHeight: 0, display: 'flex' } : {}}>
+            <textarea
+              ref=${noteRef}
+              class="task-note-input"
+              placeholder="Telemetry notes (optional)"
+              value=${note}
+              onInput=${(e) => setNote(e.target.value)}
+              style=${editTask ? { flex: 1, height: '100%', resize: 'none' } : {}}
+            />
+            <span class="note-close-btn" onMouseDown=${(e) => { e.preventDefault(); noteRef.current.blur(); }}>DONE</span>
           </div>
+
+          ${!editTask ? objectivesContent : null}
+          
+          ${editTask ? html`
+            <div class="launch-row" style=${{ marginTop: 'auto' }}>
+              <button class="btn-abort" onClick=${goHome}>Abort</button>
+              <button
+                class="btn-launch"
+                style=${{ background: selectedConstr ? selectedConstr.primary_color : '#ffffff' }}
+                onClick=${handleSubmit}
+              >
+                Save Pit Stop ▶
+              </button>
+            </div>
+          ` : null}
         </div>
 
+        ${editTask ? html`
+          <div class="garage-right-panel" style=${{ padding: 0, border: 'none', background: 'transparent' }}>
+            <div class="garage-left-panel" style=${{ flex: 1, margin: 0 }}>
+              ${objectivesContent}
+            </div>
+          </div>
+        ` : html`
         <!-- Right: Garage / Constructor picker -->
         <div class="garage-right-panel">
           <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.1)' }}></div>
           <div class="panel-eyebrow">Garage Bay — Constructor</div>
 
-          <div class="start-lights-row">
-            <div class="start-light on"></div>
-            <div class="start-light on"></div>
-            <div class="start-light on"></div>
-            <div class="start-light on"></div>
-            <div class="start-light"></div>
-            ${error ? html`<span class="garage-error-pill">${error}</span>` : html`<span class="select-team-label">Select Team</span>`}
-          </div>
+          ${error ? html`<div class="garage-error-pill" style=${{ marginTop: '10px' }}>${error}</div>` : null}
 
           <div class="constructor-grid">
             ${(constructors || []).map(c => html`
@@ -206,7 +265,8 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
                 class=${'constructor-tile' + (!c.available ? ' tile-disabled' : '') + (constructorId === c.id ? ' tile-selected' : '')}
                 style=${{
                   borderColor: constructorId === c.id ? c.primary_color : 'transparent',
-                  boxShadow: constructorId === c.id ? ('0 0 0 1px ' + c.primary_color + ', inset 0 0 20px rgba(0,0,0,0.3)') : 'none'
+                  boxShadow: constructorId === c.id ? ('0 0 0 1px ' + c.primary_color + ', inset 0 0 20px rgba(0,0,0,0.3)') : 'none',
+                  cursor: 'pointer'
                 }}
                 onClick=${() => { if (c.available) { setConstructorId(c.id); setError(''); } }}
               >
@@ -228,7 +288,9 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
             </button>
           </div>
         </div>
+        `}
 
+        </div>
       </div>
     </div>
   `;
@@ -237,7 +299,7 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
 // ==========================================
 // Task Detail Screen
 // ==========================================
-function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }) {
+function TaskDetail({ task, goHome, goToAdd, refreshTasks, onCompleteTask, constructors }) {
   if (!task) {
     return html`
       <div class="overlay-modal">
@@ -305,19 +367,25 @@ function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }
 
         <!-- Header -->
         <div class="detail-header">
-          <button class="back-btn" onClick=${goHome}>
-            <span class="back-arrow-box">←</span>
-            Pit Lane
-          </button>
-          <div class="lap-counter">
-            Lap ${completedCount} / ${totalCount}
+          <div style=${{ justifySelf: 'start', display: 'flex' }}>
+            <button class="back-btn" onClick=${goHome}>
+              <span class="back-arrow-box">←</span>
+              Pit Lane
+            </button>
           </div>
-          ${laneConstr.name ? html`
-            <div class="team-badge" style=${{ borderColor: accentColor + '55', background: accentColor + '18' }}>
-              <div class="badge-pip" style=${{ background: accentColor }}></div>
-              <span class="badge-team" style=${{ color: accentColor }}>${laneConstr.name.toUpperCase()}</span>
-            </div>
-          ` : null}
+          <div style=${{ justifySelf: 'center', display: 'flex' }}>
+            ${laneConstr.name ? html`
+              <div class="team-badge" style=${{ borderColor: accentColor + '88', background: accentColor + '33' }}>
+                <div class="badge-pip" style=${{ background: accentColor }}></div>
+                <span class="badge-team" style=${{ color: accentColor }}>${laneConstr.name.toUpperCase()}</span>
+              </div>
+            ` : null}
+          </div>
+          <div style=${{ justifySelf: 'end', display: 'flex' }}>
+            <button class="back-btn" style=${{ paddingRight: 0 }} onClick=${() => goToAdd(task.constructor_id, task)}>
+              Edit
+            </button>
+          </div>
         </div>
 
         <!-- Body -->
@@ -325,7 +393,6 @@ function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }
 
           <!-- Left: task info + subtasks -->
           <div class="detail-left-panel">
-            <div class="panel-top-bar" style=${{ background: accentColor }}></div>
             <div class="detail-task-title">${task.title}</div>
             ${task.note ? html`<p class="detail-task-note">${task.note}</p>` : null}
 
@@ -357,7 +424,6 @@ function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }
 
             <!-- Progress circle card -->
             <div class="race-data-card">
-              <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.07)' }}></div>
               <div class="section-eyebrow">Race Progress</div>
 
               <div class="progress-circle-wrap">
@@ -401,7 +467,6 @@ function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }
 
             <!-- Stats + flag card -->
             <div class="race-data-card flag-card">
-              <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.07)' }}></div>
               <div class="pit-stats">
                 <div class="pit-stat-row">
                   <span class="pit-key">Position</span>
@@ -437,6 +502,7 @@ function App() {
   const [constructors, setConstructors] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [intendedConstructorId, setIntendedConstructorId] = useState(null);
+  const [taskToEdit, setTaskToEdit] = useState(null);
 
   const refreshData = useCallback(async () => {
     try {
@@ -470,9 +536,9 @@ function App() {
   }, [refreshData]);
 
   const goHome = useCallback(() => {
-    refreshData();
     setScreen('home');
-    setSelectedTaskId(null);
+    setTaskToEdit(null);
+    refreshData();
   }, [refreshData]);
 
   const handleCompleteTask = useCallback(async (task) => {
@@ -502,8 +568,9 @@ function App() {
     }, 50);
   }, [refreshData]);
 
-  const goToAdd = useCallback((constructorId) => {
+  const goToAdd = useCallback((constructorId, taskObj = null) => {
     setIntendedConstructorId(constructorId || null);
+    setTaskToEdit(taskObj);
     setScreen('add');
   }, []);
 
@@ -537,12 +604,14 @@ function App() {
             goHome=${goHome}
             constructors=${constructors}
             preSelectedConstructorId=${intendedConstructorId}
+            editTask=${taskToEdit}
           />
         ` : null}
         ${screen === 'detail' ? html`
           <${TaskDetail}
             task=${tasks.find(t => t.id === selectedTaskId) || null}
             goHome=${goHome}
+            goToAdd=${goToAdd}
             refreshTasks=${refreshData}
             constructors=${constructors}
             onCompleteTask=${handleCompleteTask}

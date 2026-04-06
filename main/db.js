@@ -120,6 +120,27 @@ function addTask({ title, note, subtasks, constructor_id }) {
     });
   }
   save();
+  save();
+  return { ok: true };
+}
+
+function updateTask({ id, title, note, subtasks, constructor_id }) {
+  db.run('UPDATE tasks SET title=?, note=?, constructor_id=?, lane=? WHERE id=?', 
+    [title, note || null, constructor_id || null, constructor_id || null, id]);
+  db.run('DELETE FROM subtasks WHERE task_id = ?', [id]);
+  
+  if (subtasks && subtasks.length) {
+    const { v4: uuidv4 } = require('uuid');
+    subtasks.forEach((st, i) => {
+      if (st.title && st.title.trim()) {
+        const stId = st.id || uuidv4();
+        const stComp = st.completed ? 1 : 0;
+        db.run('INSERT INTO subtasks (id,task_id,title,completed,position) VALUES (?,?,?,?,?)',
+          [stId, id, st.title.trim(), stComp, i]);
+      }
+    });
+  }
+  save();
   return { ok: true };
 }
 
@@ -145,4 +166,4 @@ function toggleSubtask(id) {
 
 function close() { if (db) { save(); db.close(); } }
 
-module.exports = { init, getAllTasks, addTask, completeTask, deleteTask, toggleSubtask, getAvailableConstructors, close };
+module.exports = { init, getAllTasks, addTask, updateTask, completeTask, deleteTask, toggleSubtask, getAvailableConstructors, close };
