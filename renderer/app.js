@@ -19,40 +19,65 @@ function Checkbox({ checked, onChange }) {
 // ==========================================
 // Home Screen (Track View)
 // ==========================================
-function Home({ tasks, constructors, onAddClick, onTaskClick }) {
+function Home({ tasks, constructors, onAddClick, onTaskClick, onShortcutsClick, finishing, onSwapLanes }) {
+  const [dragOverLane, setDragOverLane] = useState(null);
+
   return html`
     <div class="lanes-wrapper">
       ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(lane => {
         const task = tasks.find(t => t.lane === lane);
+        const isFinishingLane = finishing && finishing.lane === lane;
+        const laneTask = isFinishingLane ? (finishing.task || task) : task;
         const laneConstr = constructors.find(c => c.id === lane);
 
         let progress = 0;
-        if (task && task.subtasks && task.subtasks.length > 0) {
-          const comp = task.subtasks.filter(s => s.completed).length;
-          progress = comp / task.subtasks.length;
+        if (laneTask && laneTask.subtasks && laneTask.subtasks.length > 0) {
+          const comp = laneTask.subtasks.filter(s => s.completed).length;
+          progress = comp / laneTask.subtasks.length;
         }
 
-        const bottomPx = task ? Math.round(24 + (progress * 323)) : 24;
-        const carImgSrc = laneConstr ? '../assets/cars/car.png' : '';
+        let bottomPx = laneTask ? Math.round(24 + (progress * 323)) : 24;
+        if (isFinishingLane && finishing.offscreen) bottomPx = 560;
+        const carImgSrc = laneConstr ? `../assets/cars/car${laneConstr.id}.png` : '';
 
         return html`
           <div
             key=${lane}
-            class="lane"
+            class=${'lane' + (dragOverLane === lane ? ' drag-over-lane' : '')}
             data-lane=${lane}
-            onClick=${() => task ? onTaskClick(task.id) : onAddClick(lane)}
+            onDragOver=${(e) => {
+              e.preventDefault();
+              setDragOverLane(lane);
+            }}
+            onDragLeave=${() => setDragOverLane(null)}
+            onDrop=${(e) => {
+              e.preventDefault();
+              setDragOverLane(null);
+              const source = e.dataTransfer.getData('sourceLane');
+              if (source && parseInt(source, 10) !== lane) {
+                onSwapLanes(parseInt(source, 10), lane);
+              }
+            }}
+            onClick=${() => laneTask ? onTaskClick(laneTask.id) : onAddClick(lane)}
           >
-            ${task ? html`
-              <div class="car-img" style=${{ bottom: bottomPx + 'px' }}>
+            ${laneTask ? html`
+              <div class="car-img" style=${{ bottom: bottomPx + 'px', cursor: 'grab' }}
+                   draggable="true"
+                   onDragStart=${(e) => {
+                     e.stopPropagation();
+                     e.dataTransfer.setData('sourceLane', lane);
+                     e.dataTransfer.effectAllowed = 'move';
+                   }}
+              >
                 <img
                   src=${carImgSrc}
                   onError=${(e) => { e.target.style.display = 'none'; }}
-                  style=${{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  style=${{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
                 />
               </div>
-              <div class="task-label">${task.title}</div>
+              <div class="task-label">${laneTask.title}</div>
             ` : null}
-            ${!task ? html`
+            ${!laneTask ? html`
               <button
                 class="add-lane-btn"
                 onClick=${(e) => { e.stopPropagation(); onAddClick(lane); }}
@@ -61,6 +86,10 @@ function Home({ tasks, constructors, onAddClick, onTaskClick }) {
           </div>
         `;
       })}
+    </div>
+    <div class="home-footer">
+      <span class="watermark">Made by Puneet Kathuria</span>
+      <button class="shortcuts-trigger" onClick=${onShortcutsClick}>Shortcuts</button>
     </div>
   `;
 }
@@ -83,7 +112,40 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
   const noteRef = useRef(null);
   const subtaskRefs = useRef([]);
 
+  const [dragItemIndex, setDragItemIndex] = useState(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState(null);
+
+  const handleDragStart = (e, i) => {
+    setDragItemIndex(i);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  
+  const handleDragEnter = (e, i) => {
+    setDragOverItemIndex(i);
+  };
+  
+  const handleDragEnd = () => {
+    if (dragItemIndex !== null && dragOverItemIndex !== null && dragItemIndex !== dragOverItemIndex) {
+      setSubtasks(prev => {
+        const copy = [...prev];
+        const item = copy.splice(dragItemIndex, 1)[0];
+        copy.splice(dragOverItemIndex, 0, item);
+        return copy;
+      });
+    }
+    setDragItemIndex(null);
+    setDragOverItemIndex(null);
+  };
+
   useEffect(() => { titleRef.current && titleRef.current.focus(); }, []);
+
+  useEffect(() => {
+    const handleSaveLaunch = () => {
+      handleSubmit();
+    };
+    document.addEventListener('pond:save-launch', handleSaveLaunch);
+    return () => document.removeEventListener('pond:save-launch', handleSaveLaunch);
+  }, [title, note, subtasks, constructorId, editTask]);
 
   const addSubtask = () => {
     setSubtasks(prev => [...prev, { title: '', completed: false }]);
@@ -124,7 +186,7 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!title.trim()) { setError('Title required'); return; }
     if (!constructorId) { setError('Choose a constructor'); return; }
     setError('');
@@ -149,17 +211,24 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
       });
     }
     goHome();
-  };
+  }, [title, note, subtasks, constructorId, editTask, goHome]);
 
   const selectedConstr = (constructors || []).find(c => c.id === constructorId);
 
   const objectivesContent = html`
     <div class="objectives-section">
       <div class="section-eyebrow">Objectives</div>
-      <div class="subtask-scroll">
+      <div class=${'subtask-scroll' + (editTask ? ' edit-spacing' : '')}>
         ${subtasks.map((st, i) => html`
-          <div class="objective-row" key=${st.id || i}>
-            <span class="obj-bullet">○</span>
+          <div class="objective-row" key=${st.id || i}
+               draggable="true"
+               onDragStart=${(e) => handleDragStart(e, i)}
+               onDragEnter=${(e) => handleDragEnter(e, i)}
+               onDragEnd=${handleDragEnd}
+               onDragOver=${(e) => e.preventDefault()}
+               style=${dragItemIndex === i ? { opacity: 0.3 } : (dragOverItemIndex === i && dragItemIndex !== i ? { borderTop: dragItemIndex > i ? '2px solid #fff' : '', borderBottom: dragItemIndex < i ? '2px solid #fff' : '' } : {})}
+          >
+            <span class="obj-bullet" style=${{ cursor: 'grab' }}>≡</span>
             <input
               ref=${(el) => { subtaskRefs.current[i] = el; }}
               class="objective-input"
@@ -330,27 +399,36 @@ function TaskDetail({ task, goHome, goToAdd, refreshTasks, onCompleteTask, const
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   const completedCount = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
   const totalCount = hasSubtasks ? task.subtasks.length : 0;
+  // Handle 0/0 edge case: if no subtasks, progress is 0%
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  // Sector breakdown: split subtasks into 3 roughly equal sectors
-  const s1End = Math.ceil(totalCount / 3);
-  const s2End = Math.ceil(totalCount * 2 / 3);
-  const s1Done = hasSubtasks ? task.subtasks.slice(0, s1End).filter(s => s.completed).length : 0;
-  const s2Done = hasSubtasks ? task.subtasks.slice(s1End, s2End).filter(s => s.completed).length : 0;
-  const s3Done = hasSubtasks ? task.subtasks.slice(s2End).filter(s => s.completed).length : 0;
-  const s1Total = s1End;
-  const s2Total = s2End - s1End;
-  const s3Total = totalCount - s2End;
+  // Sector breakdown: securely split subtasks into 3 perfectly bounded sectors
+  let s1Total = 0, s2Total = 0, s3Total = 0;
+  let s1Done = 0, s2Done = 0, s3Done = 0;
+  
+  if (totalCount > 0) {
+    s1Total = Math.ceil(totalCount / 3);
+    s2Total = Math.ceil((totalCount - s1Total) / 2);
+    s3Total = totalCount - s1Total - s2Total;
+
+    const s1Items = task.subtasks.slice(0, s1Total);
+    const s2Items = task.subtasks.slice(s1Total, s1Total + s2Total);
+    const s3Items = task.subtasks.slice(s1Total + s2Total);
+
+    s1Done = s1Items.filter(s => s.completed).length;
+    s2Done = s2Items.filter(s => s.completed).length;
+    s3Done = s3Items.filter(s => s.completed).length;
+  }
 
   const sectorColor = (done, total) => {
-    if (total === 0) return '#333';
+    if (total === 0) return 'rgba(255,255,255,0.08)';
     const r = done / total;
     if (r === 1) return '#00d066';
     if (r > 0) return '#ffe000';
     return 'rgba(255,255,255,0.08)';
   };
 
-  // Circle arc
+  // Circle arc - ensure perfect bounding
   const radius = 35;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (progressPct / 100) * circumference;
@@ -421,7 +499,6 @@ function TaskDetail({ task, goHome, goToAdd, refreshTasks, onCompleteTask, const
 
           <!-- Right: race data -->
           <div class="detail-right-col">
-
             <!-- Progress circle card -->
             <div class="race-data-card">
               <div class="section-eyebrow">Race Progress</div>
@@ -484,10 +561,76 @@ function TaskDetail({ task, goHome, goToAdd, refreshTasks, onCompleteTask, const
                 CHEQUERED FLAG
               </button>
             </div>
-
           </div>
         </div>
 
+      </div>
+    </div>
+  `;
+}
+
+// ==========================================
+// Shortcuts Modal
+// ==========================================
+function ShortcutsModal({ onClose }) {
+  return html`
+    <div class="overlay-modal" onClick=${onClose}>
+      <div class="shortcuts-panel" onClick=${(e) => e.stopPropagation()}>
+        <div class="detail-header">
+          <button class="back-btn" onClick=${onClose}>
+            <span class="back-arrow-box">←</span>
+            Back to Track
+          </button>
+        </div>
+        <div class="panel-eyebrow" style=${{ marginTop: '10px' }}>Keyboard Shortcuts</div>
+        <div class="shortcuts-grid">
+          <span class="shortcut-label">New Task</span>
+          <div class="shortcut-keys">
+            <span class="key">⌘</span><span class="key">N</span>
+          </div>
+          <span class="shortcut-label">Save / Launch</span>
+          <div class="shortcut-keys">
+            <span class="key">⌘</span><span class="key">S</span>
+          </div>
+          <span class="shortcut-label">Save / Launch</span>
+          <div class="shortcut-keys">
+            <span class="key">⌘</span><span class="key">↵</span>
+          </div>
+          <span class="shortcut-label">Go Back / Close</span>
+          <div class="shortcut-keys">
+            <span class="key">Esc</span>
+          </div>
+          <span class="shortcut-label">Toggle Popover</span>
+          <div class="shortcut-keys">
+            <span class="key">⌘</span><span class="key">⇧</span><span class="key">P</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ==========================================
+// Celebration Overlay
+// ==========================================
+function CelebrationOverlay({ task, onClose, onAdd }) {
+  return html`
+    <div class="overlay-modal glass-blur celebration-overlay">
+      <div class="celebrating-card">
+        <div class="celebrating-header">
+          <div class="trophy-icon">🏁</div>
+          <div class="celebration-subtitle">Task Finished</div>
+        </div>
+        <div class="celebration-title">CONGRATULATIONS</div>
+        
+        <div class="celebration-actions" style=${{ marginTop: '24px', width: '260px' }}>
+          <button class="btn-return-pit" onClick=${onClose}>
+            Close Window
+          </button>
+          <button class="btn-stay-garage" onClick=${onAdd}>
+            Add New Task
+          </button>
+        </div>
       </div>
     </div>
   `;
@@ -503,6 +646,9 @@ function App() {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [intendedConstructorId, setIntendedConstructorId] = useState(null);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [finishing, setFinishing] = useState(null);
+  const [celebratedTask, setCelebratedTask] = useState(null);
 
   const refreshData = useCallback(async () => {
     try {
@@ -521,6 +667,12 @@ function App() {
       console.error('Failed to fetch data:', err);
     }
   }, []);
+
+  const handleSwapLanes = useCallback(async (laneA, laneB) => {
+    if (laneA === laneB) return;
+    await window.pond.swapLanes(laneA, laneB);
+    await refreshData();
+  }, [refreshData]);
 
   useEffect(() => { refreshData(); }, [refreshData]);
 
@@ -542,31 +694,40 @@ function App() {
   }, [refreshData]);
 
   const handleCompleteTask = useCallback(async (task) => {
+    // Drive finish animation via React state so it doesn't get overwritten by re-renders.
+    // We only mark the task complete in the DB AFTER the animation finishes.
+    setFinishing({ task, lane: task.lane, offscreen: false });
     setScreen('home');
     setSelectedTaskId(null);
+
+    // Kick the car "offscreen" (CSS transition on `bottom` will animate).
     setTimeout(() => {
-      const laneEl = document.querySelector('.lane[data-lane="' + task.lane + '"]');
-      if (!laneEl) {
-        window.pond.completeTask(task.id).then(refreshData);
-        return;
+      setFinishing((prev) => (prev ? { ...prev, offscreen: true } : prev));
+    }, 80);
+
+    // Persist completion & refresh tasks after animation.
+    setTimeout(async () => {
+      try {
+        await window.pond.completeTask(task.id);
+      } finally {
+        setFinishing(null);
+        refreshData();
+        
+        setCelebratedTask(task);
+        if (typeof window.confetti === 'function') {
+           const laneConstr = constructors.find(c => c.id === task.constructor_id) || {};
+           const accentColor = laneConstr.primary_color || '#ffffff';
+           window.confetti({     
+             particleCount: 150,
+             spread: 80,
+             origin: { y: 0.6 },
+             colors: [accentColor, laneConstr.secondary_color || '#ffffff', '#ffffff'],
+             zIndex: 2000
+           });
+        }
       }
-      const carEl = laneEl.querySelector('.car-img');
-      if (carEl) {
-        carEl.style.transition = 'bottom 0.4s ease-in';
-        carEl.style.bottom = '560px';
-        setTimeout(() => {
-          laneEl.style.backgroundColor = 'rgba(255,255,255,0.15)';
-          laneEl.style.transition = 'background-color 0.1s';
-          setTimeout(() => {
-            laneEl.style.backgroundColor = 'transparent';
-            window.pond.completeTask(task.id).then(refreshData);
-          }, 200);
-        }, 400);
-      } else {
-        window.pond.completeTask(task.id).then(refreshData);
-      }
-    }, 50);
-  }, [refreshData]);
+    }, 650);
+  }, [refreshData, constructors]);
 
   const goToAdd = useCallback((constructorId, taskObj = null) => {
     setIntendedConstructorId(constructorId || null);
@@ -579,16 +740,53 @@ function App() {
     setScreen('detail');
   }, []);
 
+  const handleSaveOrLaunch = useCallback(() => {
+    if (screen === 'add') {
+      // Trigger the submit handler in AddTask
+      // We'll use a custom event to communicate with AddTask
+      const event = new CustomEvent('pond:save-launch');
+      document.dispatchEvent(event);
+    }
+  }, [screen]);
+
   useEffect(() => {
     const handler = (e) => {
+      // Cmd/Ctrl + N: New Task
+      if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+        e.preventDefault();
+        goToAdd(null);
+        return;
+      }
+
+      // Cmd/Ctrl + S: Save/Launch
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveOrLaunch();
+        return;
+      }
+
+      // Cmd/Ctrl + Enter: Save/Launch
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSaveOrLaunch();
+        return;
+      }
+
+      // Escape: Navigate back / Close overlays
       if (e.key === 'Escape') {
-        if (screen !== 'home') { setScreen('home'); }
-        else if (window.pond && window.pond.escape) { window.pond.escape(); }
+        if (showShortcuts) {
+          setShowShortcuts(false);
+        } else if (screen !== 'home') {
+          setScreen('home');
+          setTaskToEdit(null);
+        } else if (window.pond && window.pond.escape) {
+          window.pond.escape();
+        }
       }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [screen]);
+  }, [screen, showShortcuts, goToAdd, handleSaveOrLaunch]);
 
   return html`
     <div class="pond-root">
@@ -598,6 +796,9 @@ function App() {
           constructors=${constructors}
           onAddClick=${goToAdd}
           onTaskClick=${goToDetail}
+          onShortcutsClick=${() => setShowShortcuts(true)}
+          finishing=${finishing}
+          onSwapLanes=${handleSwapLanes}
         />
         ${screen === 'add' ? html`
           <${AddTask}
@@ -616,6 +817,16 @@ function App() {
             constructors=${constructors}
             onCompleteTask=${handleCompleteTask}
           />
+        ` : null}
+        ${celebratedTask ? html`
+          <${CelebrationOverlay}
+            task=${celebratedTask}
+            onClose=${() => { setCelebratedTask(null); window.pond.escape(); }}
+            onAdd=${() => { setCelebratedTask(null); goToAdd(null); }}
+          />
+        ` : null}
+        ${showShortcuts ? html`
+          <${ShortcutsModal} onClose=${() => setShowShortcuts(false)} />
         ` : null}
       </div>
     </div>

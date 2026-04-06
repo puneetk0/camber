@@ -42,16 +42,16 @@ async function init() {
   const cCount = db.exec('SELECT COUNT(*) FROM constructors');
   if (!cCount.length || cCount[0].values[0][0] === 0) {
     db.run(`INSERT INTO constructors VALUES
-      (1,  'Red Bull Racing', '#3671C6', '#FF1E00', 'redbull.png'),
-      (2,  'Ferrari',         '#E8002D', '#FFCC00', 'ferrari.png'),
-      (3,  'McLaren',         '#FF8000', '#000000', 'mclaren.png'),
-      (4,  'Mercedes',        '#00D2BE', '#000000', 'mercedes.png'),
-      (5,  'Aston Martin',    '#006F62', '#CEDC00', 'astonmartin.png'),
-      (6,  'Alpine',          '#FF87BC', '#0090FF', 'alpine.png'),
-      (7,  'Williams',        '#005AFF', '#FFFFFF', 'williams.png'),
-      (8,  'Haas',            '#B6BABD', '#E8002D', 'haas.png'),
-      (9,  'Visa RB',         '#6692FF', '#C8001E', 'visarb.png'),
-      (10, 'Kick Sauber',     '#52E252', '#000000', 'sauber.png')
+      (1,  'Red Bull Racing', '#3671C6', '#FF1E00', 'car1.png'),
+      (2,  'Ferrari',         '#E8002D', '#FFCC00', 'car2.png'),
+      (3,  'McLaren',         '#FF8000', '#000000', 'car3.png'),
+      (4,  'Mercedes',        '#00D2BE', '#000000', 'car4.png'),
+      (5,  'Aston Martin',    '#006F62', '#CEDC00', 'car5.png'),
+      (6,  'Alpine',          '#FF87BC', '#0090FF', 'car6.png'),
+      (7,  'Williams',        '#005AFF', '#FFFFFF', 'car7.png'),
+      (8,  'Haas',            '#B6BABD', '#E8002D', 'car8.png'),
+      (9,  'Visa RB',         '#6692FF', '#C8001E', 'car9.png'),
+      (10, 'Kick Sauber',     '#52E252', '#000000', 'car10.png')
     `);
   }
 

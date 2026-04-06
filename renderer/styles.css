@@ -108,13 +108,18 @@ body,
   background: rgba(255, 255, 255, 0.04);
 }
 
+.lane.drag-over-lane {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
 .car-img {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 48px;
-  height: 48px;
-  transition: bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 68px;
+  height: 68px;
+  transition: bottom 0.6s cubic-bezier(0.25, 1, 0.5, 1), left 0.6s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -124,7 +129,7 @@ body,
 .task-label {
   position: absolute;
   top: 40px;
-  bottom: 80px;
+  bottom: 100px;
   left: 50%;
   writing-mode: vertical-rl;
   text-orientation: mixed;
@@ -342,8 +347,8 @@ body,
   letter-spacing: 1px;
   padding: 4px 8px;
   border-radius: 4px;
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s, background 0.2s;
@@ -352,11 +357,11 @@ body,
 }
 
 .note-close-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 
-.task-note-input:focus + .note-close-btn {
+.task-note-input:focus+.note-close-btn {
   opacity: 1;
   pointer-events: auto;
 }
@@ -1050,4 +1055,246 @@ body,
 .checkbox.checked {
   background: var(--red);
   border-color: var(--red);
+}
+
+/* ==========================================
+   Phase 3 Additions: Layout tweaks & Shortcuts Modal
+   ========================================== */
+
+/* Edit Spacing for Objectives */
+.subtask-scroll.edit-spacing {
+  gap: 15px;
+  padding: 10px 0;
+}
+
+.subtask-scroll.edit-spacing .objective-row {
+  padding: 10px 14px;
+}
+
+.subtask-scroll.edit-spacing .objective-input {
+  font-size: 14px;
+}
+
+/* Home Footer */
+.home-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+  z-index: 10;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.watermark {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.shortcuts-trigger {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.shortcuts-trigger:hover {
+  color: #fff;
+}
+
+/* Track modifications to reserve 30px */
+.track-container {
+  padding-bottom: 30px;
+}
+
+/* Shortcuts Modal Container */
+.shortcuts-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  color: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(255, 255, 255, 0.05);
+}
+
+.shortcuts-panel .panel-eyebrow {
+  white-space: nowrap;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.shortcut-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+}
+
+.shortcut-keys {
+  display: flex;
+  gap: 5px;
+}
+
+.key {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   Completed State (Phase 3.3)
+   ========================================== */
+
+.glass-blur {
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.celebration-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  z-index: 100;
+}
+
+.celebrating-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.celebrating-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.trophy-icon {
+  font-size: 48px;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.celebration-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.celebration-subtitle {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.celebration-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.btn-return-pit {
+  width: 100%;
+  padding: 12px;
+  background: var(--text-primary);
+  color: var(--bg-dark);
+  border: none;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.btn-return-pit:hover {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.btn-stay-garage {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btn-stay-garage:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
