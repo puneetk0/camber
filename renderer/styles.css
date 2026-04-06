@@ -472,7 +472,10 @@ body,
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-  margin-top: 32px;
+  margin-top: 16px;
+  padding: 4px;
+  margin-left: -4px;
+  margin-right: -4px;
   flex: 1;
   overflow-y: auto;
   align-content: start;
