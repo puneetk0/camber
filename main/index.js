@@ -7,6 +7,7 @@ const { startNotchWatcher, stopNotchWatcher } = require('./notch');
 
 let win = null;
 let popoverVisible = false;
+let pinned = false;
 
 function createWindow() {
   const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
@@ -48,11 +49,12 @@ function showPopover() {
 }
 
 function hidePopover() {
-  if (!win || !popoverVisible) return;
+  if (!win || !popoverVisible || pinned) return; // add pinned check
   popoverVisible = false;
   win.setSize(690, 0, true);
   win.webContents.send('popover:hide');
 }
+
 
 function togglePopover() {
   popoverVisible ? hidePopover() : showPopover();
@@ -67,7 +69,10 @@ app.whenReady().then(async () => {
   globalShortcut.register('CommandOrControl+Shift+P', togglePopover);
   startNotchWatcher(win, showPopover, hidePopover, () => popoverVisible);
 
-  ipcMain.on('popover:escape', () => hidePopover());
+  ipcMain.on('popover:pin', () => {
+  pinned = !pinned;
+  win.webContents.send('popover:pinned', pinned);
+});
 });
 
 app.on('will-quit', () => {

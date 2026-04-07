@@ -1,7 +1,7 @@
 // ==========================================
 // Task Detail Screen
 // ==========================================
-function TaskDetail({ task, goHome, goToAdd, refreshTasks, onCompleteTask, constructors }) {
+function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask, constructors }) {
   if (!task) {
     return html`
       <div class="overlay-modal">
@@ -124,7 +124,19 @@ function TaskDetail({ task, goHome, goToAdd, refreshTasks, onCompleteTask, const
 
   const laneConstr = constructors.find(c => c.id === task.constructor_id) || {};
   const accentColor = laneConstr.primary_color || '#ffffff';
-  const position = 1;
+const position = (() => {
+  if (!tasks || tasks.length === 0) return 1;
+  const ranked = [...tasks].sort((a, b) => {
+    const pctA = a.subtasks.length > 0
+      ? a.subtasks.filter(s => s.completed).length / a.subtasks.length
+      : 0;
+    const pctB = b.subtasks.length > 0
+      ? b.subtasks.filter(s => s.completed).length / b.subtasks.length
+      : 0;
+    return pctB - pctA;
+  });
+  return ranked.findIndex(t => t.id === task.id) + 1;
+})();
 
   // --- Render ---
   return html`

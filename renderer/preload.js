@@ -18,4 +18,9 @@ contextBridge.exposeInMainWorld('pond', {
     ipcRenderer.on('popover:hide', cb);
     return () => ipcRenderer.removeListener('popover:hide', cb);
   },
+  pin: () => ipcRenderer.send('popover:pin'),
+onPinned: (cb) => {
+  ipcRenderer.on('popover:pinned', (_e, val) => cb(val));
+  return () => ipcRenderer.removeListener('popover:pinned', cb);
+},
 });

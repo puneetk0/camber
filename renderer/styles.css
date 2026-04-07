@@ -407,6 +407,32 @@ body,
   flex-shrink: 0;
 }
 
+.pin-btn {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  padding: 0;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+.pin-btn:hover {
+  opacity: 0.8;
+  color: #fff;
+}
+
+.pin-btn.pinned {
+  opacity: 1;
+}
+
 .objective-input {
   flex: 1;
   background: transparent;
@@ -1114,6 +1140,11 @@ body,
   letter-spacing: 1px;
   transition: color 0.2s;
   padding: 0;
+}
+
+.pin-diff {
+  display: flex;
+  gap: 16px;
 }
 
 .shortcuts-trigger:hover {

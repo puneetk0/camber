@@ -3,6 +3,17 @@
 // ==========================================
 function Home({ tasks, constructors, onAddClick, onTaskClick, onShortcutsClick, finishing, onSwapLanes }) {
   const [dragOverLane, setDragOverLane] = useState(null);
+  const [pinned, setPinned] = useState(false);
+
+useEffect(() => {
+  if (window.pond.onPinned) {
+    return window.pond.onPinned((val) => setPinned(val));
+  }
+}, []);
+
+const handlePin = () => {
+  window.pond.pin();
+};
 
   return html`
     <div class="lanes-wrapper">
@@ -74,7 +85,18 @@ function Home({ tasks, constructors, onAddClick, onTaskClick, onShortcutsClick, 
     </div>
     <div class="home-footer">
       <span class="watermark">Made by Puneet Kathuria</span>
-      <button class="shortcuts-trigger" onClick=${onShortcutsClick}>Shortcuts</button>
+      <div class="pin-diff">
+      <button class="shortcuts-trigger" onClick=${onShortcutsClick}>
+  ⌘ Shortcuts
+</button>
+      <button 
+  class=${'pin-btn' + (pinned ? ' pinned' : '')} 
+  onClick=${handlePin}
+  title=${pinned ? 'Unpin' : 'Pin open'}
+>
+  ${pinned ? 'Unpin' : 'Pin'}
+</button>
+</div>
     </div>
   `;
 }

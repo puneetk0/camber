@@ -2,6 +2,15 @@
 // Shortcuts Modal
 // ==========================================
 function ShortcutsModal({ onClose }) {
+  const shortcuts = [
+    { label: 'Toggle popover', keys: ['⌘', '⇧', 'P'] },
+    { label: 'Pin / unpin open', keys: ['⌘', '⇧', 'L'] },
+    { label: 'New task', keys: ['⌘', 'N'] },
+    { label: 'Save / launch', keys: ['⌘', 'S'] },
+    { label: 'This screen', keys: ['⌘', ','] },
+    { label: 'Go back / close', keys: ['Esc'] },
+  ];
+
   return html`
     <div class="overlay-modal" onClick=${onClose}>
       <div class="shortcuts-panel" onClick=${(e) => e.stopPropagation()}>
@@ -13,32 +22,18 @@ function ShortcutsModal({ onClose }) {
         </div>
         <div class="panel-eyebrow" style=${{ marginTop: '10px' }}>Keyboard Shortcuts</div>
         <div class="shortcuts-grid">
-          <span class="shortcut-label">New Task</span>
-          <div class="shortcut-keys">
-            <span class="key">⌘</span><span class="key">N</span>
-          </div>
-          <span class="shortcut-label">Save / Launch</span>
-          <div class="shortcut-keys">
-            <span class="key">⌘</span><span class="key">S</span>
-          </div>
-          <span class="shortcut-label">Save / Launch</span>
-          <div class="shortcut-keys">
-            <span class="key">⌘</span><span class="key">↵</span>
-          </div>
-          <span class="shortcut-label">Go Back / Close</span>
-          <div class="shortcut-keys">
-            <span class="key">Esc</span>
-          </div>
-          <span class="shortcut-label">Toggle Popover</span>
-          <div class="shortcut-keys">
-            <span class="key">⌘</span><span class="key">⇧</span><span class="key">P</span>
-          </div>
+          ${shortcuts.map(({ label, keys }) => html`
+            <span class="shortcut-label" key=${label}>${label}</span>
+            <div class="shortcut-keys" key=${label + '-keys'}>
+              ${keys.map(k => html`<span class="key" key=${k}>${k}</span>`)}
+            </div>
+          `)}
         </div>
+        <div class="shortcuts-footer">⌘ + , to close this anytime</div>
       </div>
     </div>
   `;
 }
-
 // ==========================================
 // Celebration Overlay
 // ==========================================

@@ -1,4 +1,4 @@
-// ==========================================
+
 // App Root
 // ==========================================
 function App() {
@@ -180,6 +180,7 @@ function App() {
         ${screen === 'detail' ? html`
           <${TaskDetail}
             task=${tasks.find(t => t.id === selectedTaskId) || null}
+            tasks=${tasks} 
             goHome=${goHome}
             goToAdd=${goToAdd}
             refreshTasks=${refreshData}
