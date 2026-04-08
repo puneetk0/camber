@@ -3,7 +3,7 @@ import htm from 'htm';
 const html = htm.bind(React.createElement);
 
 // ==========================================
-// Task Detail Screen — Race Telemetry Mode
+// Task Detail Screen
 // ==========================================
 function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask, constructors }) {
   if (!task) {
@@ -13,10 +13,10 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
           <div class="detail-header">
             <button class="back-btn" onClick=${goHome}>
               <span class="back-arrow-box">←</span>
-              PIT LANE
+              Pit Lane
             </button>
           </div>
-          <div class="empty-state">SIGNAL LOST... CHECK TRACK CONNECTION</div>
+          <div class="empty-state">Task lost on track.</div>
         </div>
       </div>
     `;
@@ -24,17 +24,28 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
 
   const [localSubtasks, setLocalSubtasks] = useState(task ? [...task.subtasks] : []);
   
-  useEffect(() => {
-    if (task) setLocalSubtasks([...task.subtasks]);
-  }, [task]);
-
   // --- Drag and Drop state ---
   const [dragItemIndex, setDragItemIndex] = useState(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState(null);
 
-  const handleDragStart = (e, i) => { setDragItemIndex(i); e.dataTransfer.effectAllowed = 'move'; };
-  const handleDragEnter = (e, i) => { e.preventDefault(); setDragOverItemIndex(i); };
-  const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+  const handleDragStart = (e, i) => {
+    setDragItemIndex(i);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnter = (e, i) => {
+    e.preventDefault();
+    setDragOverItemIndex(i);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+  const handleDragEnd = () => {
+  setDragItemIndex(null);
+  setDragOverItemIndex(null);
+};
 
   const handleDrop = async (e, i) => {
     e.preventDefault();
@@ -57,39 +68,70 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
     setDragItemIndex(null);
     setDragOverItemIndex(null);
   };
-
-  const handleDragEnd = () => { setDragItemIndex(null); setDragOverItemIndex(null); };
-
-  const handleToggle = async (subtaskId) => {
-    const current = localSubtasks.find(s => s.id === subtaskId);
-    const newState = current ? !current.completed : true;
-    
-    let evaluated = localSubtasks.map(ch =>
-      ch.id === subtaskId ? { ...ch, completed: newState } : ch
-    );
-    evaluated = [...evaluated].sort((a, b) => {
-      if (a.completed && !b.completed) return 1;
-      if (!a.completed && b.completed) return -1;
-      return 0;
+useEffect(() => {
+  if (task) {
+    setLocalSubtasks(prev => {
+      // Stabilize order: if the set of subtask IDs is the same, keep the current order
+      if (prev && prev.length > 0 && prev.length === task.subtasks.length) {
+        const prevIds = prev.map(s => s.id).sort().join(',');
+        const nextIds = task.subtasks.map(s => s.id).sort().join(',');
+        if (prevIds === nextIds) {
+          return prev.map(ps => {
+            const updated = task.subtasks.find(ts => ts.id === ps.id);
+            return updated ? { ...ps, ...updated } : ps;
+          });
+        }
+      }
+      return [...task.subtasks];
     });
-    setLocalSubtasks(evaluated);
+  }
+}, [task]);
 
-    await window.pond.toggleSubtask(subtaskId);
-    const newIds = evaluated.map(s => s.id);
-    if (window.pond.reorderSubtasks) {
-      await window.pond.reorderSubtasks(task.id, newIds);
-    }
-    
-    const fullyDone = evaluated.length > 0 && evaluated.every(st => st.completed);
-    if (fullyDone) { onCompleteTask(task); } else { await refreshTasks(); }
-  };
+// --- Drag and Drop state ---
+const handleToggle = async (subtaskId) => {
+  const current = localSubtasks.find(s => s.id === subtaskId);
+  if (!current) return;
+  const newState = !current.completed;
 
+  // 1. Update ONLY the completion state in local state, NOT the order
+  // This prevents the row from jumping while the user is looking at it
+  const updatedLocal = localSubtasks.map(st =>
+    st.id === subtaskId ? { ...st, completed: newState } : st
+  );
+  setLocalSubtasks(updatedLocal);
+
+  // 2. Persist completion state to DB
+  await window.pond.toggleSubtask(subtaskId);
+
+  // 3. Calculate and persist the "eventual" order for the DB
+  // Completed items will move to the bottom next time the list is loaded
+  const forDB = [...updatedLocal].sort((a, b) => {
+    if (a.completed && !b.completed) return 1;
+    if (!a.completed && b.completed) return -1;
+    return 0;
+  });
+
+  const newIds = forDB.map(s => s.id);
+  if (window.pond.reorderSubtasks) {
+    await window.pond.reorderSubtasks(task.id, newIds);
+  }
+
+  const fullyDone = updatedLocal.length > 0 && updatedLocal.every(st => st.completed);
+  if (fullyDone) { 
+    onCompleteTask(task); 
+  } else { 
+    // Refresh parent state so the car moves on the track background
+    await refreshTasks(); 
+  }
+};
+
+  // --- Progress calculations ---
   const hasSubtasks = localSubtasks && localSubtasks.length > 0;
   const completedCount = hasSubtasks ? localSubtasks.filter(s => s.completed).length : 0;
   const totalCount = hasSubtasks ? localSubtasks.length : 0;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  // Sector breakdown
+  // --- Sector breakdown ---
   let s1Total = 0, s2Total = 0, s3Total = 0;
   let s1Done = 0, s2Done = 0, s3Done = 0;
   
@@ -108,54 +150,60 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
   }
 
   const sectorColor = (done, total) => {
-    if (total === 0) return 'rgba(255,255,255,0.05)';
-    return done === total ? '#00ff88' : (done > 0 ? '#ffdd00' : 'rgba(255,255,255,0.08)');
+    if (total === 0) return 'rgba(255,255,255,0.08)';
+    const r = done / total;
+    if (r === 1) return '#00d066';
+    if (r > 0) return '#ffe000';
+    return 'rgba(255,255,255,0.08)';
   };
 
-  const radius = 40;
+  // --- Progress circle ---
+  const radius = 35;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (progressPct / 100) * circumference;
 
   const laneConstr = constructors.find(c => c.id === task.constructor_id) || {};
   const accentColor = laneConstr.primary_color || '#ffffff';
+const position = (() => {
+  const activeTasks = tasks ? tasks.filter(t => t.lane >= 1 && t.lane <= 10) : [];
+  if (!activeTasks || activeTasks.length === 0) return 1;
+  const ranked = [...activeTasks].sort((a, b) => {
+    const pctA = a.subtasks.length > 0
+      ? a.subtasks.filter(s => s.completed).length / a.subtasks.length
+      : 0;
+    const pctB = b.subtasks.length > 0
+      ? b.subtasks.filter(s => s.completed).length / b.subtasks.length
+      : 0;
+    return pctB - pctA;
+  });
+  const idx = ranked.findIndex(t => t.id === task.id);
+  return idx !== -1 ? idx + 1 : 1;
+})();
 
-  const position = (() => {
-    const activeTasks = tasks ? tasks.filter(t => t.lane >= 1 && t.lane <= 10) : [];
-    const ranked = [...activeTasks].sort((a, b) => {
-      const pctA = a.subtasks.length > 0 ? a.subtasks.filter(s => s.completed).length / a.subtasks.length : 0;
-      const pctB = b.subtasks.length > 0 ? b.subtasks.filter(s => s.completed).length / b.subtasks.length : 0;
-      return pctB - pctA;
-    });
-    const idx = ranked.findIndex(t => t.id === task.id);
-    return idx !== -1 ? idx + 1 : 1;
-  })();
-
+  // --- Render ---
   return html`
     <div class="overlay-modal">
       <div class="detail-shell">
 
         <!-- Header -->
         <div class="detail-header">
-          <div style=${{ justifySelf: 'start' }}>
+          <div style=${{ justifySelf: 'start', display: 'flex' }}>
             <button class="back-btn" onClick=${goHome}>
               <span class="back-arrow-box">←</span>
-              PIT LANE
+              Pit Lane
             </button>
           </div>
-          <div style=${{ justifySelf: 'center' }}>
+          <div style=${{ justifySelf: 'center', display: 'flex' }}>
             ${laneConstr.name ? html`
-              <div class="team-badge" style=${{ 
-                borderColor: accentColor + '88', 
-                background: accentColor + '22',
-                boxShadow: '0 0 20px ' + accentColor + '33'
-              }}>
+              <div class="team-badge" style=${{ borderColor: accentColor + '88', background: accentColor + '33' }}>
+               
                 <span class="badge-team" style=${{ color: accentColor }}>${laneConstr.name.toUpperCase()}</span>
               </div>
             ` : null}
           </div>
-          <div style=${{ justifySelf: 'end' }}>
+          <div style=${{ justifySelf: 'end', display: 'flex' }}>
             <button class="back-btn" style=${{ paddingRight: 0 }} onClick=${() => goToAdd(task.constructor_id, task)}>
-              MODIFY SPECS
+              Edit
             </button>
           </div>
         </div>
@@ -163,15 +211,14 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
         <!-- Body -->
         <div class="detail-body">
 
-          <!-- Left: Mission Status & Objectives -->
+          <!-- Left: task info + subtasks -->
           <div class="detail-left-panel">
-            <div class="panel-eyebrow">Active Mission Telemetry</div>
-            <div class="detail-task-title">${task.title.toUpperCase()}</div>
+            <div class="detail-task-title">${task.title}</div>
             ${task.note ? html`<p class="detail-task-note">${task.note}</p>` : null}
 
-            <div class="panel-eyebrow" style=${{ marginTop: '10px' }}>
-               Tactical Objectives 
-               <span style=${{ marginLeft: 'auto', color: accentColor }}>${completedCount}/${totalCount}</span>
+            <div class="objectives-header">
+              <span class="section-eyebrow">Objectives</span>
+              <span class="section-eyebrow">${completedCount} / ${totalCount} complete</span>
             </div>
 
             <div class="detail-subtask-list">
@@ -186,38 +233,37 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
                   onDragOver=${handleDragOver}
                   onDrop=${(e) => handleDrop(e, i)}
                   onDragEnd=${handleDragEnd}
-                  style=${dragItemIndex === i ? { opacity: 0.3 } : (dragOverItemIndex === i && dragItemIndex !== i ? { borderTop: '2px solid ' + accentColor } : {})}
+                  style=${dragItemIndex === i ? { opacity: 0.3 } : (dragOverItemIndex === i && dragItemIndex !== i ? { borderTop: dragItemIndex > i ? '2px solid rgba(255,255,255,0.4)' : '', borderBottom: dragItemIndex < i ? '2px solid rgba(255,255,255,0.4)' : '' } : {})}
                 >
-                  <div class="detail-chk" style=${{ 
-                    borderColor: st.completed ? accentColor : 'rgba(255,255,255,0.2)', 
-                    background: st.completed ? accentColor : 'transparent',
-                    boxShadow: st.completed ? '0 0 10px ' + accentColor : 'none'
-                  }}>
-                    ${st.completed ? html`<span style=${{ color: '#000' }}>✓</span>` : ''}
+                  <div class=${'detail-chk' + (st.completed ? ' chk-filled' : '')}
+                    style=${{ borderColor: st.completed ? accentColor : 'rgba(255,255,255,0.2)', background: st.completed ? accentColor : 'transparent' }}
+                  >
+                    ${st.completed ? '✓' : ''}
                   </div>
                   <span class=${st.completed ? 'st-label done' : 'st-label'}>${st.title}</span>
                 </div>
-              `) : html`<div class="empty-state">NO OBJECTIVES ASSIGNED</div>`}
+              `) : html`<div class="empty-state" style=${{ flex: 1, fontSize: '12px' }}>No objectives set.</div>`}
             </div>
           </div>
 
-          <!-- Right: Race Metrics -->
+          <!-- Right: race data -->
           <div class="detail-right-col">
+            <!-- Progress circle card -->
             <div class="race-data-card">
-              <div class="panel-eyebrow">Race Progress</div>
+              <div class="section-eyebrow">Race Progress</div>
 
               <div class="progress-circle-wrap">
-                <svg width="110" height="110" viewBox="0 0 110 110" style=${{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="55" cy="55" r=${radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10"/>
+                <svg width="90" height="90" viewBox="0 0 90 90" style=${{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="45" cy="45" r=${radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="7"/>
                   <circle
-                    cx="55" cy="55" r=${radius}
+                    cx="45" cy="45" r=${radius}
                     fill="none"
                     stroke=${accentColor}
-                    strokeWidth="10"
+                    strokeWidth="7"
                     strokeLinecap="round"
                     strokeDasharray=${circumference}
                     strokeDashoffset=${dashOffset}
-                    style=${{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                    style=${{ transition: 'stroke-dashoffset 0.5s ease' }}
                   />
                 </svg>
                 <div class="circle-label">
@@ -237,8 +283,7 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
                     <div class="sector-track">
                       <div class="sector-fill" style=${{
                         width: (total > 0 ? Math.round((done / total) * 100) : 0) + '%',
-                        background: sectorColor(done, total),
-                        boxShadow: done === total ? '0 0 10px #00ff88' : 'none'
+                        background: sectorColor(done, total)
                       }}></div>
                     </div>
                   </div>
@@ -246,27 +291,21 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
               </div>
             </div>
 
-            <div class="race-data-card" style=${{ flex: 1, justifyContent: 'space-between' }}>
+            <!-- Stats + flag card -->
+            <div class="race-data-card flag-card">
               <div class="pit-stats">
                 <div class="pit-stat-row">
-                  <span class="pit-key">GRID POS</span>
-                  <span class="pit-val" style=${{ color: accentColor }}>P${position}</span>
+                  <span class="pit-key">Position</span>
+                  <span class="pit-val">P${position}</span>
                 </div>
                 <div class="pit-stat-row">
-                  <span class="pit-key">REMAINING</span>
-                  <span class="pit-val">${totalCount - completedCount} OBJ</span>
+                  <span class="pit-key">Remaining</span>
+                  <span class="pit-val">${totalCount - completedCount} obj</span>
                 </div>
               </div>
-              
               <button
                 class="chequered-btn"
                 onClick=${() => onCompleteTask(task)}
-                style=${{ 
-                   background: progressPct === 100 ? '#fff' : 'rgba(255,255,255,0.1)',
-                   color: progressPct === 100 ? '#000' : 'rgba(255,255,255,0.3)',
-                   border: progressPct === 100 ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                   boxShadow: progressPct === 100 ? '0 0 30px rgba(255,255,255,0.4)' : 'none'
-                }}
               >
                 CHEQUERED FLAG
               </button>

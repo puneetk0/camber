@@ -58,7 +58,13 @@ function hidePopover() {
 
 
 function togglePopover() {
-  popoverVisible ? hidePopover() : showPopover();
+  if (popoverVisible) {
+    pinned = false; // Reset pinned state when manually toggling hide
+    if (win) win.webContents.send('popover:pinned', pinned);
+    hidePopover();
+  } else {
+    showPopover();
+  }
 }
 
 app.whenReady().then(async () => {
@@ -73,6 +79,18 @@ app.whenReady().then(async () => {
       showPopover();
     }
     if (win) win.webContents.send('popover:pinned', pinned);
+  });
+
+  globalShortcut.register('CommandOrControl+Shift+P', () => {
+    if (popoverVisible) {
+      pinned = false;
+      if (win) win.webContents.send('popover:pinned', pinned);
+      hidePopover();
+    } else {
+      pinned = true;
+      if (win) win.webContents.send('popover:pinned', pinned);
+      showPopover();
+    }
   });
 
   startNotchWatcher(win, showPopover, hidePopover, () => popoverVisible);

@@ -9,26 +9,29 @@ const GITHUB_URL = 'https://github.com/puneetk0';      // 🔁 Replace
 function createTray(toggleFn) {
   const iconPath = path.join(__dirname, '..', 'assets', 'tray-icon.png');
 
-  let icon;
-  try {
-    icon = nativeImage.createFromPath(iconPath);
-    icon = icon.resize({ width: 22, height: 22 });
-  } catch {
-    icon = nativeImage.createEmpty();
+  let icon = nativeImage.createFromPath(iconPath);
+  if (!icon.isEmpty()) {
+    icon = icon.resize({ width: 18, height: 18 });
+    icon.setTemplateImage(true);
   }
 
   tray = new Tray(icon);
-  tray.setToolTip('Pond');
+  tray.setToolTip('Camber');
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Give Feedback', click: () => shell.openExternal(FEEDBACK_URL) },
     { label: 'GitHub', click: () => shell.openExternal(GITHUB_URL) },
     { type: 'separator' },
-    { label: 'Quit Pond', click: () => require('electron').app.quit() },
+    { label: 'Quit Camber', click: () => require('electron').app.quit() },
   ]);
 
+  // Set the context menu — on macOS this typically shows on right-click
   tray.setContextMenu(contextMenu);
-  tray.on('click', toggleFn);
+
+  // Handle left-click for toggling
+  tray.on('click', () => {
+    toggleFn();
+  });
 
   return tray;
 }

@@ -1,111 +1,225 @@
 # Camber 🏎️
-### The missions-driven productivity engine for macOS.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Platform: macOS](https://img.shields.io/badge/Platform-macOS-blue.svg)]()
-[![Built with Electron](https://img.shields.io/badge/Built%20with-Electron-8CC84B.svg)]()
+> Your tasks, racing from your notch.
 
----
+![Platform](https://img.shields.io/badge/platform-macOS-black?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.0-red?style=flat-square)
+![Built with Electron](https://img.shields.io/badge/built%20with-Electron-47848F?style=flat-square)
 
-![Camber Hero GIF Placeholder](https://via.placeholder.com/800x450/111111/ffffff?text=Camber:+Hover+over+your+notch+to+reveal+the+race)
-
-> [!NOTE]
-> **Camber** isn't just a todo list; it's a high-performance racing grid for your daily tasks. It lives seamlessly in your macOS notch, waiting for you to hover before it blooms into a full-scale telemetry dashboard.
-
----
-
-## 🏎️ What is this?
-**Camber** is a notch-native productivity application designed to transform boring daily chores into high-stakes missions on an F1 track. Instead of checking off boxes on a flat list, you choose a constructor, prepare your car in the garage, and watch it progress toward the finish line as you complete your objectives.
-
-Designed specifically for the macOS notch, Camber stays out of your way until you need it, providing a frictionless way to track "visual momentum" throughout your workday.
+<!-- HERO GIF: Full-width screen recording showing the notch hover → popover opens →
+     car visible on track → click task → detail view → check off subtask → car moves.
+     Ideal length: 6-8 seconds, looping. Filename: demo.gif -->
 
 ---
 
-## ✨ Features
-- **Notch-Native Interaction**: A frameless, vibrant popover that reveals itself only when you hover over the center of your menu bar (the notch).
-- **Constructor Garage**: Choose from 10 legendary F1 teams (Red Bull, Ferrari, Mercedes, etc.), each with their own signature car models and color profiles.
-- **Live Racing Grid**: Tasks are represented as cars in active lanes. As you complete subtasks, your car physically moves up the track toward the finish line.
-- **Smart Telemetry (Notes)**: Take detailed mission notes with a specialized "auto-link" engine that turns URLs into clickable dashboard elements. 
-- **Victory Lap Celebration**: Completing a mission triggers a high-octane celebratory confetti burst and drives your car off the screen.
-- **Global Pit Wall Controls**: Fully keyboard-driven experience with global shortcuts to pin, unpin, or launch missions instantly.
+## What is Camber?
+
+Camber lives in your MacBook's notch. Hover over it and a race track drops down — each lane is a task, each car is your progress. Complete subtasks and your car drives toward the finish line. Cross it and the race is won.
+
+No separate app to open. No window to find. No boring checkbox list. Just glance up, see where everything stands, and get back to work.
 
 ---
 
-## 🔥 Why it's different
-Traditional productivity apps feel like work. **Camber feels like a race.** 
-By mapping the "distance to done" to a physical racing grid, Camber provides immediate, visceral feedback on your productivity. It reduces the cognitive load of a massive todo list by focusing you on your active "drivers" and their progress toward the apex.
+## Why Camber is different
+
+Every todo app puts your tasks in a list. You open the app, scroll, find the task, open it, find the subtask, check it, close it. That's four steps to record five seconds of progress.
+
+Camber is always one hover away. The notch — dead space on every MacBook — becomes your pit wall. The F1 metaphor isn't decoration: it encodes real information. A car near the finish line means you're almost done. A car at the start means you haven't touched it. Ten lanes means you always know the state of everything without reading a word.
+
+Traditional productivity apps feel like work. **Camber feels like a race.**
 
 ---
 
-## 🛠️ Installation
+## Features
 
-### For Users (Production)
-1. Download the latest `Camber.dmg` from the **Releases** section.
-2. Drag **Camber** into your `/Applications` folder.
-3. Launch Camber. Look for the small tray icon, then simply hover your mouse over the macOS notch to reveal the grid.
-
-### For Developers (Clone and Run)
-If you want to customize the telemetry or add new track features:
-```bash
-# 1. Clone the repository
-git clone https://github.com/puneetkathuria/camber.git
-cd camber
-
-# 2. Install dependencies
-npm install
-
-# 3. Start development mode
-npm start
-
-# 4. Build the universal macOS DMG
-npm run build
-```
+- **Notch-native** — hover over the MacBook notch to open, move away to close
+- **F1 race track** — 10 lanes, one per F1 constructor, each car represents a task
+- **Progress is physical** — cars move up the lane as subtasks are completed
+- **Constructor Garage** — choose from 10 legendary F1 teams, each with their own car model and color profile
+- **Subtasks first** — subtasks are not an afterthought, they drive the whole experience
+- **Pin mode** — lock Camber open while you work, close when you're done
+- **Smart Telemetry** — task notes with an auto-link engine that turns URLs into clickable elements
+- **Drag to reorder** — drag objectives within a task, drag cars between lanes
+- **Victory Lap** — finish a task and get a chequered flag moment with confetti
+- **Keyboard first** — every action has a shortcut, nothing requires the mouse
+- **Zero menubar clutter** — lives in the notch, not the menubar
+- **Local and private** — everything stored in SQLite on your machine, nothing leaves it
 
 ---
 
-## 🏗️ Architecture
-Camber is built with a lightweight, high-performance stack optimized for the macOS desktop environment.
-
-- **Main Process (`/main`)**: Manages the native macOS window with `vibrancy` effects and handles the `NotchWatcher` which triggers based on mouse proximity to the menu bar.
-- **Renderer (`/renderer`)**: A React-driven telemetry board using `HTM` for a slim, build-less feel.
-- **Database (`/main/db.js`)**: Local persistence powered by `SQL.js`, ensuring your data stays private and stays on your machine.
-- **Asset Engine**: Renders 10 distinct constructor car models centered and scaled for a premium feel.
-
-```text
-├── main/             # Main Process (IPC, Window management, Notch logic)
-├── renderer/         # React Frontend (Track, Garage, Details)
-├── assets/           # Car PNGs, Track background, and UI icons
-├── package.json      # Universal build scripts and dependencies
-└── webpack.config.js # Asset inlining for "zero-flicker" startup
-```
-
----
-
-## 🕹️ Pit Wall Controls (Shortcuts)
+## Keyboard Shortcuts
 
 | Shortcut | Action |
-| :--- | :--- |
-| `Cmd + Shift + L` | **Pin / Unpin** Dashboard globally |
-| `Cmd + N` | Open the **Garage** for a New Mission |
-| `Cmd + S` or `Enter` | **Launch** Mission from Garage |
-| `Cmd + ,` | View **Shortcuts** Pit Map |
-| `Esc` | Return to **Pit Lane** / Hide Dashboard |
+|----------|--------|
+| `Cmd + Shift + P` | Toggle Camber open / close (pinned) |
+| `Cmd + Shift + L` | Toggle pin — lock open or release |
+| `Cmd + N` | New task |
+| `Cmd + S` or `Enter` | Save / launch task from add or edit screen |
+| `Cmd + ,` | Open keyboard shortcuts reference |
+| `Escape` | Go back / close |
 
 ---
 
-## 🤝 Contributing
-Want to add a new car model or improve the telemetry logic?
-1. Fork the repository.
-2. Create your mission branch (`git checkout -b mission/add-feature`).
-3. Commit your changes (`git commit -m 'Add new track telemetry'`).
-4. Push to the branch (`git push origin mission/add-feature`).
-5. Open a Pull Request.
+## Installation
+
+### Download (recommended)
+
+1. Go to [Releases](https://github.com/puneetko/camber/releases)
+2. Download `Camber.dmg` from the latest release
+3. Open the DMG and drag Camber to your Applications folder
+4. **First launch:** right-click Camber → Open → Open
+
+> macOS will warn that Camber is from an unidentified developer because it is not yet notarized. Right-clicking and choosing Open bypasses this once — after that it opens normally.
+
+<!-- SCREENSHOT: The macOS "cannot be opened" warning dialog with a caption explaining
+     the right-click workaround. Filename: gatekeeper.png -->
+
+### Requirements
+
+- macOS 12 Monterey or later
+- Apple Silicon or Intel Mac (universal binary)
+- MacBook with notch recommended (Pro 14" 2021 onwards) — works on non-notch Macs too via `Cmd + Shift + P`
 
 ---
 
-## 📜 Credits & License
-- **Created by**: [Puneet Kathuria](https://linkedin.com/in/puneet-kathuria)
-- **License**: Distributed under the MIT License. See `LICENSE` for more information.
+## Running from source
+
+### Prerequisites
+
+- Node.js 18 or later
+- npm 9 or later
+
+### Setup
+
+```bash
+git clone https://github.com/puneetko/camber.git
+cd camber
+npm install
+npm start
+```
+
+### Build a distributable DMG
+
+```bash
+npm run build:renderer && npm run build
+```
+
+Output lands in `dist/Camber.dmg` as a universal binary — runs natively on both Apple Silicon and Intel.
+
+
+
+## Architecture
+
+Camber is intentionally simple. No Redux, no complex state management. If you can read JavaScript, you can read Camber.
+camber/
+├── main/
+│   ├── index.js          # Electron entry — window, tray, shortcuts, IPC wiring
+│   ├── db.js             # All SQLite via sql.js — schema, queries, migrations
+│   ├── ipc.js            # ipcMain handlers — bridges renderer requests to db
+│   ├── notch.js          # Mouse polling — detects notch hover, shows/hides popover
+│   └── tray.js           # Menubar tray icon and context menu
+├── renderer/
+│   ├── index.html        # Shell
+│   ├── globals.js        # HTM + React bindings, shared hooks
+│   ├── app.js            # Root component — screen routing, global state
+│   ├── HomeScreen.js     # The race track — 10 lanes, cars, drag-to-swap
+│   ├── AddTaskScreen.js  # Garage form — title, notes, objectives, constructor picker
+│   ├── TaskDetailScreen.js # Pit wall — subtask checklist, progress circle, sectors
+│   ├── Overlays.js       # Shortcuts modal, celebration overlay
+│   ├── preload.js        # contextBridge — exposes window.pond API to renderer
+│   └── styles.css        # All styles in one file, CSS variables, no framework
+└── assets/
+├── cars/             # car1.png → car10.png — top-down F1 car sprites
+└── track-bg.png      # Track surface background
+
+### How the notch trigger works
+
+macOS has no public API for notch interaction. Camber polls the global mouse position every 100ms using Electron's `screen.getCursorScreenPoint()`. When the cursor enters a hit zone centered at the top of the display — approximately 200px wide and 25px tall — the popover window is shown. A 300ms grace period prevents flickering when the cursor briefly leaves the zone.
+
+The popover is a frameless, transparent `BrowserWindow` anchored to the top center of the primary display. `setAlwaysOnTop(true, 'floating')` keeps it above normal windows without fighting the macOS compositor.
+
+### Data layer
+
+Everything is SQLite via [sql.js](https://github.com/sql-js/sql.js) — an in-memory SQLite compiled to WebAssembly, persisted to `~/Library/Application Support/Camber/camber.db` on every write. No ORM, no migration library, plain SQL. Three tables: `tasks`, `subtasks`, and `constructors`.
+
+### IPC pattern
+
+The renderer has no access to Node APIs. All data operations go through a `contextBridge` API exposed as `window.pond`. The renderer calls `window.pond.getTasks()`, the preload sends it over IPC, the main process queries SQLite and returns the result. Clean separation, no security shortcuts.
 
 ---
+
+## The F1 Constructors
+
+| Lane | Constructor | Color |
+|------|-------------|-------|
+| 1 | Red Bull Racing | `#3671C6` |
+| 2 | Ferrari | `#E8002D` |
+| 3 | McLaren | `#FF8000` |
+| 4 | Mercedes | `#00D2BE` |
+| 5 | Aston Martin | `#006F62` |
+| 6 | Alpine | `#FF87BC` |
+| 7 | Williams | `#005AFF` |
+| 8 | Haas | `#B6BABD` |
+| 9 | Visa RB | `#6692FF` |
+| 10 | Kick Sauber | `#52E252` |
+
+---
+
+## Roadmap
+
+Not promises, just direction.
+
+- Animated F1 car sprites instead of static PNGs
+- Due dates with visual urgency encoding on the track
+- Global quick-capture shortcut that works without opening the full popover
+- Proper Apple notarization for one-click install
+- Multiple workspaces / race seasons
+
+---
+
+## Contributing
+
+Camber is open source and contributions are welcome. Open an issue first before building anything significant so we can discuss it.
+
+```bash
+git clone https://github.com/puneetko/camber.git
+cd camber
+npm install
+npm start
+```
+
+**Useful contributions:** better car SVGs, Windows/Linux support, bug reports with reproduction steps, performance improvements to the notch polling mechanism.
+
+**Please avoid:** cloud sync or accounts (Camber is intentionally local-first), changing the core F1 metaphor, large refactors without discussion.
+
+### Pull request process
+
+1. Fork the repo
+2. Create a branch: `git checkout -b fix/your-fix-name`
+3. Make your changes and test on macOS with `npm start`
+4. Open a PR with a clear description of what changed and why
+
+---
+
+## Built with
+
+- [Electron](https://www.electronjs.org/) — desktop runtime
+- [React](https://react.dev/) — UI
+- [HTM](https://github.com/developit/htm) — JSX without a build step
+- [sql.js](https://github.com/sql-js/sql.js) — SQLite in WebAssembly
+- [canvas-confetti](https://github.com/catdad/canvas-confetti) — the celebration moment
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE) for details.
+
+---
+
+Built by [Puneet Kathuria](https://github.com/puneetko) as a personal project that got out of hand in the best way.
+
+If Camber helps you ship something, leave a star. If it doesn't, open an issue.
+
 *Keep your head down, focus on the apex, and finish the mission.* 🏁
