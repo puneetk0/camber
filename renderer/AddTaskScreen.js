@@ -215,7 +215,11 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
         <div class="detail-header">
           <div style=${{ justifySelf: 'start', display: 'flex' }}>
             <button class="back-btn" onClick=${goHome}>
-              <span class="back-arrow-box">←</span>
+              <span class="back-arrow-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              </span>
               Pit Lane
             </button>
           </div>
@@ -327,7 +331,9 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
                 style=${{ background: constructorId ? ((constructors || []).find(c => c.id === constructorId)?.primary_color || '#fff') : '#ffffff' }}
                 onClick=${handleSubmit}
               >
-                ${editTask ? 'Save Pit Stop ▶' : 'Launch ▶'}
+                <span class="btn-text-skew-reverse">
+                  ${editTask ? 'Save Pit Stop ▶' : 'Launch ▶'}
+                </span>
               </button>
             </div>
           </div>

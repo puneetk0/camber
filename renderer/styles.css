@@ -1,6 +1,7 @@
 /* ==========================================
    Pond V2 — F1 Track Edition
    ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --bg-dark: #181818;
@@ -9,8 +10,8 @@
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.55);
   --text-dim: rgba(255, 255, 255, 0.45);
-  --panel-bg: rgba(0, 0, 0, 0.45);
-  --panel-border: rgba(255, 255, 255, 0.12);
+  --panel-bg: rgba(0, 0, 0, 0.65);
+  --panel-border: rgba(255, 255, 255, 0.15);
   --green: #00d066;
   --yellow: #ffe000;
   --red: #e8002d;
@@ -31,7 +32,7 @@ body,
   height: 460px;
   overflow: hidden;
   background: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
@@ -216,18 +217,22 @@ body,
 }
 
 .panel-eyebrow {
-  font-size: 9px;
-  font-weight: 800;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 3px;
-  color: var(--text-dim);
+  color: #fff;
+  opacity: 0.7;
   text-transform: uppercase;
 }
 
 .section-eyebrow {
-  font-size: 9px;
-  font-weight: 800;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 2.5px;
-  color: var(--text-dim);
+  color: #fff;
+  opacity: 0.7;
   text-transform: uppercase;
 }
 
@@ -248,8 +253,9 @@ body,
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: var(--panel-bg);
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.75) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   padding: 16px;
   position: relative;
@@ -291,19 +297,19 @@ body,
 
 .task-title-input {
   width: 100%;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   color: #fff;
   background: transparent;
   border: none;
   outline: none;
-  letter-spacing: -0.3px;
+  letter-spacing: 0.5px;
   font-family: inherit;
 }
 
 .task-title-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.25);
+  font-weight: 700;
 }
 
 /* Note textarea */
@@ -382,8 +388,9 @@ body,
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 14px;
   min-height: 0;
+  margin-top: 12px;
 }
 
 .objective-row {
@@ -439,13 +446,15 @@ body,
   background: transparent;
   border: none;
   outline: none;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
   font-family: inherit;
+  letter-spacing: 0.5px;
 }
 
 .objective-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .obj-remove {
@@ -490,8 +499,9 @@ body,
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: var(--panel-bg);
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.75) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   padding: 16px;
   position: relative;
@@ -616,12 +626,12 @@ body,
 .btn-abort {
   flex: 1;
   padding: 11px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  border: none;
+  border-radius: 4px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
@@ -630,8 +640,7 @@ body,
 }
 
 .btn-abort:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.6);
+  color: #fff;
 }
 
 .btn-launch {
@@ -639,25 +648,33 @@ body,
   padding: 11px;
   color: #000;
   border: none;
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 900;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
   font-family: inherit;
-  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
   position: relative;
   overflow: hidden;
+  transform: skewX(-12deg);
+}
+
+.btn-launch .btn-text-skew-reverse {
+  display: inline-block;
+  transform: skewX(12deg);
 }
 
 .btn-launch:hover {
-  opacity: 0.88;
-  transform: scale(0.99);
+  opacity: 0.9;
+  transform: skewX(-12deg) scale(1.02);
+  box-shadow: 0 0 20px currentColor;
 }
 
 .btn-launch:active {
-  transform: scale(0.97);
+  transform: skewX(-12deg) scale(0.97);
 }
 
 /* Launch shimmer */
@@ -723,22 +740,15 @@ body,
 }
 
 .back-arrow-box {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 16px;
   transition: all 0.2s;
-  padding-bottom: 2px;
 }
 
 .back-btn:hover .back-arrow-box {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(-2px);
 }
 
 .lap-counter {
@@ -790,8 +800,9 @@ body,
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: var(--panel-bg);
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.75) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   padding: 18px;
   position: relative;
@@ -800,19 +811,21 @@ body,
 }
 
 .detail-task-title {
+  font-family: inherit;
   font-size: 20px;
   font-weight: 800;
   color: #fff;
-  letter-spacing: -0.3px;
-  line-height: 1.2;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
 }
 
 .detail-task-note {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.5;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+  padding-bottom: 12px;
 }
 
 .objectives-header {
@@ -887,8 +900,9 @@ body,
 }
 
 .race-data-card {
-  background: var(--panel-bg);
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.75) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -917,8 +931,9 @@ body,
 }
 
 .circle-pct {
+  font-family: inherit;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 700;
   color: #fff;
   line-height: 1;
 }
@@ -991,17 +1006,19 @@ body,
 }
 
 .pit-key {
-  font-size: 12px;
-  font-weight: 800;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 2px;
   color: var(--text-dim);
   text-transform: uppercase;
 }
 
 .pit-val {
+  font-family: inherit;
   font-size: 13px;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 1);
 }
 
 .chequered-btn {
@@ -1010,25 +1027,34 @@ body,
   background: repeating-conic-gradient(rgba(255, 255, 255, 0.05) 0% 25%, transparent 25% 50%) 50% / 10px 10px, #1a1a1a;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 900;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
-  font-family: inherit;
+  font-family: 'Rajdhani', sans-serif;
   position: relative;
   overflow: hidden;
-  transition: all 0.15s;
+  transition: all 0.2s;
+  transform: skewX(-12deg);
+}
+
+.chequered-btn .btn-text-skew-reverse {
+  display: inline-block;
+  transform: skewX(12deg);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .chequered-btn:hover {
   background: repeating-conic-gradient(rgba(255, 255, 255, 0.1) 0% 25%, transparent 25% 50%) 50% / 10px 10px, #000;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: skewX(-12deg) scale(1.02);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 .chequered-btn:active {
-  transform: scale(0.98);
+  transform: skewX(-12deg) scale(0.98);
 }
 
 .chequered-btn::after {
@@ -1495,7 +1521,7 @@ body,
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 7px;
   color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
+  font-size: 11px;
   padding: 12px 14px;
   overflow-y: auto;
   cursor: text;

@@ -189,7 +189,11 @@ const position = (() => {
         <div class="detail-header">
           <div style=${{ justifySelf: 'start', display: 'flex' }}>
             <button class="back-btn" onClick=${goHome}>
-              <span class="back-arrow-box">←</span>
+              <span class="back-arrow-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+              </span>
               Pit Lane
             </button>
           </div>
@@ -240,6 +244,7 @@ const position = (() => {
                   >
                     ${st.completed ? '✓' : ''}
                   </div>
+
                   <span class=${st.completed ? 'st-label done' : 'st-label'}>${st.title}</span>
                 </div>
               `) : html`<div class="empty-state" style=${{ flex: 1, fontSize: '12px' }}>No objectives set.</div>`}
@@ -307,7 +312,7 @@ const position = (() => {
                 class="chequered-btn"
                 onClick=${() => onCompleteTask(task)}
               >
-                CHEQUERED FLAG
+                <span class="btn-text-skew-reverse">CHEQUERED FLAG</span>
               </button>
             </div>
           </div>
