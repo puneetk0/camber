@@ -212,11 +212,6 @@ npm start
 
 ---
 
-## License
-
-MIT — see [LICENSE](./LICENSE) for details.
-
----
 
 Built by [Puneet Kathuria](https://github.com/puneetko) as a personal project that got out of hand in the best way.
 
