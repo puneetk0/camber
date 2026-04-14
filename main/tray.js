@@ -3,7 +3,7 @@ const path = require('path');
 
 let tray = null;
 
-const FEEDBACK_URL = 'https://instagram.com/puneet.25_'; // 🔁 Replace
+const FEEDBACK_URL = 'https://forms.gle/tWUenJWkG36vPawc7'; // 🔁 Replace
 const GITHUB_URL = 'https://github.com/puneetk0';      // 🔁 Replace
 
 function createTray(toggleFn) {
